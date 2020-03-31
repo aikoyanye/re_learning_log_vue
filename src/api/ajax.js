@@ -1,7 +1,10 @@
 import axios from 'axios'
+axios.defaults.withCredentials = true;
 
 let http = axios.create({
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+        'Content-Type': 'application/json',
+    },
     baseURL: 'http://127.0.0.1:8001'
 });
 
