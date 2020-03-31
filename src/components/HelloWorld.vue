@@ -11,7 +11,7 @@
           <el-menu-item index="5">5555</el-menu-item>
           <el-menu-item index="6">6666</el-menu-item>
           <el-submenu index="7" style="float:right" v-if="isLogin">
-            <template slot="title">{{userInfo.name}}</template>
+            <template slot="title">{{userInfo.username}}</template>
             <el-menu-item index="2-1">选项1</el-menu-item>
             <el-menu-item index="2-2">选项2</el-menu-item>
             <el-menu-item index="2-3">选项3</el-menu-item>
@@ -25,28 +25,47 @@
       <el-main>
 
       </el-main>
-      <el-footer><el-row type="flex" class="row-bg" justify="center">footer</el-row></el-footer>
+      <el-footer></el-footer>
     </el-container>
-    <AllDialog @loginSuccess="handleLoginSuccess" :loginDialog.sync="showLoginDialog"></AllDialog>
+    <el-dialog
+            title="登录"
+            :visible.sync="showLoginDialog"
+            width="30%">
+      <el-input v-model="loginForm.Email" placeholder="" minlength="1">
+        <template slot="prepend">登录邮箱</template>
+      </el-input>
+      <div style="margin: 20px;"></div>
+      <el-input v-model="loginForm.Password" placeholder="" type="password" minlength="1">
+        <template slot="prepend">登录密码</template>
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="showLoginDialog = false">取消</el-button>
+    <el-button type="primary" @click="login"><i class="el-icon-check"></i></el-button>
+  </span>
+    </el-dialog>
   </div>
 
 </template>
 
 <script>
-  import AllDialog from "@/components/AllDialog.vue";
+  import h from '../api/ajax.js'
   export default {
     data() {
       return {
         isLogin: false,
         showLoginDialog:false,
-        userInfo:{
-          name:"",
+        userInfo: {
+          username:"",
           id:0
+        },
+        loginForm: {
+          Email: '',
+          Password: ''
         }
       };
     },
     components:{
-      AllDialog
+
     },
     name: 'HelloWorld',
     props: {
@@ -54,41 +73,19 @@
       username: String,
     },
     methods:{
-      handleLoginSuccess:function (userData){
-        this.isLogin = true;
-        this.userInfo = userData;
+      login:function (){
+        let _this = this;
+        // 预编译语句可以防注入
+        h().post('/user/login', this.loginForm)
+                .then(function (response) {
+                  _this.isLogin = true;
+                  _this.userInfo = response.data;
+                  alert(response.data['username'])
+                }).catch(function (error) {
+                  alert(error);
+        })
       }
     }
   }
 
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
-  .el-row {
-    margin-bottom: 20px;
-  &:last-child {
-     margin-bottom: 0;
-   }
-  }
-  .el-col {
-    border-radius: 4px;
-  }
-  .bg-purple-dark {
-    background: #99a9bf;
-  }
-  .bg-purple {
-    background: #d3dce6;
-  }
-  .bg-purple-light {
-    background: #e5e9f2;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-  }
-  .row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
-  }
-</style>
