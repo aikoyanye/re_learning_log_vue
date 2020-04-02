@@ -12,12 +12,12 @@
           <el-menu-item index="6">6666</el-menu-item>
           <el-submenu index="7" style="float:right" v-if="isLogin">
             <template slot="title">{{userInfo.Username}}</template>
-            <el-menu-item index="2-1">选项1</el-menu-item>
+            <el-menu-item index="2-1" @click="logout">注销</el-menu-item>
             <el-menu-item index="2-2">选项2</el-menu-item>
             <el-menu-item index="2-3">选项3</el-menu-item>
           </el-submenu>
           <div v-else>
-            <el-menu-item index="8" style="float:right" @click="showLoginDialog= true">登录</el-menu-item>
+            <el-menu-item index="8" style="float:right" @click="showLoginDialog = true">登录</el-menu-item>
             <el-menu-item index="9" style="float:right" @click="showSignUpDialog = true">注册</el-menu-item>
           </div>
         </el-menu>
@@ -68,7 +68,6 @@
   </span>
     </el-dialog>
   </div>
-
 </template>
 
 <script>
@@ -122,14 +121,22 @@
                     _this.showSignUpDialog = false;
                     alert("注册成功，现在你可以登录了");
                   }).catch(function (error) {
-            alert(error);
+                    alert(error);
           })
         }else{
           alert("两次密码输入不正确");
         }
+      }, logout: function () {
+        h().post('/user/logout', )
+                .then(function (response) {
+                  location.reload();
+                }).catch(function (error) {
+                  alert(error);
+        })
       }
     },mounted(){
-      if(document.cookie.length > 0){
+      let username = GetCookie("Username");
+      if(username !== ""){
         this.userInfo.Username = GetCookie("Username");
         this.userInfo.Id = GetCookie("Id");
         this.isLogin = true;
