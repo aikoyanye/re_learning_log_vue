@@ -7,4 +7,13 @@ export var GetCookie = function (name){
             return arr2[1];
         }
     }
-}
+};
+
+export var MsgNotify = function (msg, t) {
+    const h = t.$createElement;
+    t.$notify({
+        title: '通知',
+        message: h('i', { style: 'color: teal'}, msg),
+        duration: 3000,
+    });
+};
