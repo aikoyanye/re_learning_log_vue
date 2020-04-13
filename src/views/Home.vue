@@ -3,10 +3,10 @@
     <el-card :body-style="{ padding: '0px' }" style="margin-top: 20px">
       <img src="../assets/bg.png" class="image">
       <div style="padding: 14px;">
-        <h2>{{ notice }}</h2>
+        <h2>{{ notice.content }}</h2>
       </div>
     </el-card>
-    <el-card style="margin-top: 20px; margin-bottom: 5px">
+    <el-card style="margin-top: 20px; margin-bottom: 10px">
       <div>
         <h3>历史更新公布</h3>
       </div>
@@ -25,11 +25,12 @@
 
 <script>
   import h from '../api/ajax.js'
+  import store from '../store/index.js'
   export default {
     data(){
       return{
-        notice: '233333333',
-        ulist: []
+        notice: store.state.notice,
+        ulist: store.state.ulist
       }
     },
     name: 'VueHome',
@@ -40,10 +41,10 @@
     mounted() {
       let _this = this;
       h().post('/home', ).then(function (response) {
-        _this.notice = response.data.Notice.Content;
+        _this.notice.content = response.data.Notice.Content;
         _this.ulist = response.data.UList;
+        store.state.ulist = _this.ulist;
       }).catch(function (error) {
-        alert(error);
       })
     }
   }

@@ -12,7 +12,7 @@
         <template slot="title">{{userInfo.Username}}</template>
         <el-menu-item index="2-1" @click="logout">注销</el-menu-item>
         <el-menu-item index="2-2" @click="showNoticeDialog = true">更新公告</el-menu-item>
-        <el-menu-item index="2-3">选项3</el-menu-item>
+        <el-menu-item index="2-3" @click="showUpdateDialog = true">添加更新事件</el-menu-item>
       </el-submenu>
       <div v-else>
         <el-menu-item index="8" style="float:right" @click="showLoginDialog = true">登录</el-menu-item>
@@ -67,11 +67,33 @@
               type="textarea"
               :rows="2"
               placeholder="请输入内容"
-              v-model="notice.content">
+              v-model="local_notice.content">
       </el-input>
       <span slot="footer" class="dialog-footer">
     <el-button @click="showNoticeDialog = false">取消</el-button>
     <el-button type="primary" @click="addNotice"><i class="el-icon-check"></i></el-button>
+  </span>
+    </el-dialog>
+    <el-dialog
+            title="添加更新事件"
+            :visible.sync="showUpdateDialog"
+            width="30%">
+      <el-input
+              type="text"
+              placeholder="请输入版本：vx.xx"
+              v-model="updateList.version">
+        <template slot="prepend">版本号</template>
+      </el-input>
+      <el-input
+              type="textarea"
+              :rows="2"
+              placeholder="请输入内容"
+              v-model="updateList.content"
+              style="margin-top: 20px">
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="showUpdateDialog = false">取消</el-button>
+    <el-button type="primary" @click="addUpdate"><i class="el-icon-check"></i></el-button>
   </span>
     </el-dialog>
   </div>
@@ -81,13 +103,16 @@
   import h from '../api/ajax.js'
   import {GetCookie, MsgNotify} from "../api/tool.js"
   import router from "../router/index.js"
+  import store from '../store/index.js'
   export default {
     data() {
       return {
+        ulist: store.state.ulist,
         isLogin: false,
         showLoginDialog: false,
         showSignUpDialog: false,
         showNoticeDialog: false,
+        showUpdateDialog: false,
         userInfo: {
           Username:"",
           Id:0
@@ -99,8 +124,13 @@
           OPassword: '',
           Password: '',
           Username: ''
-        }, notice: {
+        },
+        notice: store.state.notice,
+        local_notice: {
           content: '',
+        }, updateList: {
+          version: '',
+          content: ''
         }
       };
     },
@@ -122,7 +152,6 @@
                   _this.showLoginDialog = false;
                   MsgNotify("欢迎回来，" + _this.userInfo.Username, _this)
                 }).catch(function (error) {
-          alert(error);
         })
       }, signup: function () {
         if(this.signupForm.OPassword == this.signupForm.Password){
@@ -130,9 +159,8 @@
           h().post('/user/signup', this.signupForm)
                   .then(function (response) {
                     _this.showSignUpDialog = false;
-                    alert("注册成功，现在你可以登录了");
+                    MsgNotify("注册成功，现在你可以登录了", _this);
                   }).catch(function (error) {
-            alert(error);
           })
         }else{
           alert("两次密码输入不正确");
@@ -142,20 +170,28 @@
                 .then(function (response) {
                   location.reload();
                 }).catch(function (error) {
-          alert(error);
         })
       }, toHome: function () {
         router.push({name: '', params: {}});
       }, addNotice: function () {
         let _this = this;
-        h().post('/home/notice', this.notice)
+        h().post('/home/notice', this.local_notice)
                 .then(function (response) {
                   MsgNotify("更新公告成功", _this);
                   _this.showNoticeDialog = false;
-                  router.push({name: '', params: {}});
+                  store.state.notice.content = _this.local_notice.content
                 }).catch(function (error) {
-                  alert(error);
-        })
+        });
+      }, addUpdate: function () {
+        let _this = this;
+        this.updateList.content.replace(/\n|\r\n/g,"<br>");
+        h().post('/home/ulist', this.updateList)
+                .then(function (response) {
+                  MsgNotify("添加更新事件成功", _this);
+                  _this.showUpdateDialog = false;
+                  store.state.ulist.unshift(response.data['ulist'][0]);
+                }).catch(function (error) {
+        });
       }
     },mounted(){
       let username = GetCookie("Username");
