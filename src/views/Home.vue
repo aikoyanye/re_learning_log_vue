@@ -1,7 +1,7 @@
 <template>
   <div class="VueHome">
     <el-card :body-style="{ padding: '0px' }" style="margin-top: 20px">
-      <img src="../assets/bg.png" class="image">
+      <img src="http://127.0.0.1:8001/resource/bg.png" class="image" height="226" width="1649">
       <div style="padding: 14px;">
         <h2>{{ notice.content }}</h2>
       </div>

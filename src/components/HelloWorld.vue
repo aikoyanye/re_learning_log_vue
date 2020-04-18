@@ -11,8 +11,11 @@
       <el-submenu index="7" style="float:right" v-if="isLogin">
         <template slot="title">{{userInfo.Username}}</template>
         <el-menu-item index="2-1" @click="logout">注销</el-menu-item>
-        <el-menu-item index="2-2" @click="showNoticeDialog = true">更新公告</el-menu-item>
-        <el-menu-item index="2-3" @click="showUpdateDialog = true">添加更新事件</el-menu-item>
+        <el-menu-item index="2-5" @click="showChangeUserInfoDialog = true">修改信息</el-menu-item>
+        <el-menu-item index="2-2" @click="showNoticeDialog = true" v-if="userInfo.Type == 'admin'">更新公告</el-menu-item>
+        <el-menu-item index="2-3" @click="showUpdateDialog = true" v-if="userInfo.Type == 'admin'">添加更新事件</el-menu-item>
+        <el-menu-item index="2-4" @click="showChangeBgImgDialog = true" v-if="userInfo.Type == 'admin'">更换首页图片</el-menu-item>
+        <el-menu-item index="2-6" @click="showBanIpDialog = true" v-if="userInfo.Type == 'admin'">添加BanIp</el-menu-item>
       </el-submenu>
       <div v-else>
         <el-menu-item index="8" style="float:right" @click="showLoginDialog = true">登录</el-menu-item>
@@ -96,12 +99,81 @@
     <el-button type="primary" @click="addUpdate"><i class="el-icon-check"></i></el-button>
   </span>
     </el-dialog>
+    <el-dialog
+            title="更换首页图片"
+            :visible.sync="showChangeBgImgDialog"
+            width="30%">
+      <el-form v-model="form">
+        <el-upload class="upload-box"
+                   action="http://127.0.0.1:8001/home/bg"
+                   name="BgImg"
+                   accept="image/png"
+                   :limit='1'
+                   :auto-upload="true"
+                   :on-success="changeBgImgOnSuccess">
+          <el-button slot="trigger"
+                     size="small"
+                     type="primary">上传png首页图片</el-button>
+          <div slot="tip"
+               class="el-upload__tip">仅支持png格式图片，宽度建议：226px、高度建议：1649px</div>
+        </el-upload>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="showChangeBgImgDialog = false">取消</el-button>
+  </span>
+    </el-dialog>
+    <el-dialog
+            title="修改用户信息"
+            :visible.sync="showChangeUserInfoDialog"
+            width="30%">
+      <el-input
+              type="text"
+              v-model="changeUserInfo.Username">
+        <template slot="prepend">用户名</template>
+      </el-input>
+      <el-input
+              type="password"
+              v-model="changeUserInfo.OPassword"
+              style="margin-top: 20px">
+        <template slot="prepend">旧密码</template>
+      </el-input>
+      <el-input
+              type="password"
+              v-model="changeUserInfo.NPassword"
+              style="margin-top: 20px">
+        <template slot="prepend">新密码</template>
+      </el-input>
+      <el-input
+              type="password"
+              v-model="changeUserInfo.ANPassword"
+              style="margin-top: 20px">
+        <template slot="prepend">重复密码</template>
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showChangeUserInfoDialog = false">取消</el-button>
+        <el-button type="primary" @click="changeUserInfoFunc"><i class="el-icon-check"></i></el-button>
+  </span>
+    </el-dialog>
+    <el-dialog
+            title="添加BanIp"
+            :visible.sync="showBanIpDialog"
+            width="30%">
+      <el-input
+              type="text"
+              v-model="banIp.BanIp">
+        <template slot="prepend">BanIp</template>
+      </el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showBanIpDialog = false">取消</el-button>
+        <el-button type="primary" @click="addBanIp"><i class="el-icon-check"></i></el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
   import h from '../api/ajax.js'
-  import {GetCookie, MsgNotify} from "../api/tool.js"
+  import {GetCookie, MsgNotify, CheckDictNil} from "../api/tool.js"
   import router from "../router/index.js"
   import store from '../store/index.js'
   export default {
@@ -113,9 +185,14 @@
         showSignUpDialog: false,
         showNoticeDialog: false,
         showUpdateDialog: false,
+        showChangeBgImgDialog: false,
+        showChangeUserInfoDialog: false,
+        showBanIpDialog: false,
+        banIp: {BanIp: ''},
         userInfo: {
-          Username:"",
-          Id:0
+          Username: '',
+          Id: 0,
+          Type: ''
         },loginForm: {
           Email: '',
           Password: ''
@@ -131,6 +208,12 @@
         }, updateList: {
           version: '',
           content: ''
+        }, changeUserInfo: {
+          Id: '',
+          Username: '',
+          OPassword: '',
+          NPassword: '',
+          ANPassword: ''
         }
       };
     },
@@ -144,16 +227,26 @@
     },
     methods:{
       login: function (){
+        if(CheckDictNil(this.loginForm)){
+          MsgNotify("输入框内容不允许为空", this);
+          return
+        }
         let _this = this;
         h().post('/user/login', this.loginForm)
                 .then(function (response) {
                   _this.isLogin = true;
                   _this.userInfo = response.data;
                   _this.showLoginDialog = false;
+                  this.changeUserInfo.Username = this.userInfo.Username;
+                  this.changeUserInfo.Id = this.userInfo.Id;
                   MsgNotify("欢迎回来，" + _this.userInfo.Username, _this)
                 }).catch(function (error) {
         })
       }, signup: function () {
+        if(CheckDictNil(this.signupForm)){
+          MsgNotify("输入框内容不允许为空", this);
+          return
+        }
         if(this.signupForm.OPassword == this.signupForm.Password){
           let _this = this;
           h().post('/user/signup', this.signupForm)
@@ -174,6 +267,10 @@
       }, toHome: function () {
         router.push({name: '', params: {}});
       }, addNotice: function () {
+        if(CheckDictNil(this.local_notice)){
+          MsgNotify("输入框内容不允许为空", this);
+          return
+        }
         let _this = this;
         h().post('/home/notice', this.local_notice)
                 .then(function (response) {
@@ -183,8 +280,11 @@
                 }).catch(function (error) {
         });
       }, addUpdate: function () {
+        if(CheckDictNil(this.updateList)){
+          MsgNotify("输入框内容不允许为空", this);
+          return
+        }
         let _this = this;
-        this.updateList.content.replace(/\n|\r\n/g,"<br>");
         h().post('/home/ulist', this.updateList)
                 .then(function (response) {
                   MsgNotify("添加更新事件成功", _this);
@@ -192,6 +292,40 @@
                   store.state.ulist.unshift(response.data['ulist'][0]);
                 }).catch(function (error) {
         });
+      }, changeBgImgOnSuccess: function () {
+        this.showChangeBgImgDialog = false;
+        MsgNotify('更新首页图片成功，刷新生效', this)
+      }, changeUserInfoFunc: function () {
+        if(CheckDictNil(this.changeUserInfo)){
+          MsgNotify("输入框内容不允许为空", this);
+          return
+        }
+        if(this.changeUserInfo.NPassword !== this.changeUserInfo.ANPassword){
+          MsgNotify("两次密码不一致", this);
+          return
+        }
+        let _this = this;
+        h().post("/user/changeInfo", this.changeUserInfo)
+                .then(function (response) {
+                  _this.showChangeUserInfoDialog = false;
+                  _this.userInfo.Username = _this.changeUserInfo.Username;
+                  MsgNotify("修改信息成功", _this);
+                }).catch(function (error) {
+                  MsgNotify("修改信息失败，稍后重试", _this);
+        })
+      }, addBanIp: function () {
+        let _this = this;
+        if(CheckDictNil(this.BanIp)){
+          MsgNotify("输入框内容不允许为空", this);
+          return
+        }
+        h().post("/banip", this.banIp)
+                .then(function (response) {
+                  _this.showBanIpDialog = false;
+                  MsgNotify("添加成功", _this);
+                }).catch(function (error) {
+                  MsgNotify("添加失败", _this);
+        })
       }
     },mounted(){
       let username = GetCookie("Username");
@@ -199,6 +333,9 @@
               && username !== false && username !== undefined){
         this.userInfo.Username = GetCookie("Username");
         this.userInfo.Id = GetCookie("Id");
+        this.userInfo.Type = GetCookie("Type");
+        this.changeUserInfo.Username = this.userInfo.Username;
+        this.changeUserInfo.Id = this.userInfo.Id;
         this.isLogin = true;
       }
     }
