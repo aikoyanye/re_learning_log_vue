@@ -3,7 +3,7 @@
     <el-menu :default-active='"1"' mode="horizontal">
       <el-menu-item><a href="/"><img alt="Logo" src="../assets/icon.png"></a></el-menu-item>
       <el-menu-item index="1" @click="toHome">首页</el-menu-item>
-      <el-menu-item index="2">分类</el-menu-item>
+      <el-menu-item index="2" @click="toTitle">分类</el-menu-item>
       <el-menu-item index="3" v-if="isLogin">3333</el-menu-item>
       <el-menu-item index="4" v-if="isLogin">4444</el-menu-item>
       <el-menu-item index="5" v-if="isLogin">5555</el-menu-item>
@@ -265,8 +265,10 @@
                 }).catch(function (error) {
         })
       }, toHome: function () {
-        router.push({name: '', params: {}});
-      }, addNotice: function () {
+        router.push({name: 'VueHome', params: {}});
+      }, toTitle: function () {
+        router.push({name: 'title', params: {}});
+      },addNotice: function () {
         if(CheckDictNil(this.local_notice)){
           MsgNotify("输入框内容不允许为空", this);
           return
