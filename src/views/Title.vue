@@ -2,10 +2,10 @@
     <div style="margin-top: 20px">
         <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px" v-for="(title, i) in titles">
             <div style="padding: 14px;">
-                <span>{{title.Title}}</span>
+                <h3 @click="toContent(title.Id)"><a href="#">{{title.Title}}</a></h3>
                 <div class="bottom clearfix">
-                    <time class="time">{{title.Created}}</time>
-                    <span class="button">{{title.Username}}</span>
+                    <time class="time">创建时间：{{title.Created}}</time>
+                    <span class="button">创建人：{{title.Username}}</span>
                 </div>
             </div>
         </el-card>
@@ -14,13 +14,19 @@
 
 <script>
     import h from '../api/ajax.js'
-    import {GetCookie, MsgNotify, CheckDictNil} from "../api/tool.js"
+    import {GetCookie, MsgNotify} from "../api/tool.js"
+    import router from "../router";
     export default {
         name: 'title',
         data(){
             return{
                 user: {Id: ''},
                 titles: []
+            }
+        },
+        methods: {
+            toContent: function (titleId) {
+                router.push({name: 'contents', params: {TitleId: titleId}})
             }
         },
         mounted() {
