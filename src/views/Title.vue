@@ -2,7 +2,7 @@
     <div style="margin-top: 20px">
         <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px" v-for="(title, i) in titles">
             <div style="padding: 14px;">
-                <h3 @click="toContent(title.Id)"><a href="#">{{title.Title}}</a></h3>
+                <h3 @click="toContent(title.Id, title.Title)"><a href="#">{{title.Title}}</a></h3>
                 <div class="bottom clearfix">
                     <time class="time">创建时间：{{title.Created}}</time>
                     <span class="button">创建人：{{title.Username}}</span>
@@ -25,8 +25,8 @@
             }
         },
         methods: {
-            toContent: function (titleId) {
-                router.push({name: 'contents', params: {TitleId: titleId}})
+            toContent: function (titleId, title) {
+                router.push({name: 'contents', params: {TitleId: titleId, Title: title}})
             }
         },
         mounted() {

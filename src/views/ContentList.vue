@@ -1,12 +1,32 @@
 <template>
     <div>
-        {{ TitleId }}
+        <el-card style="margin-top: 20px; margin-bottom: 10px">
+            <div>
+                <h3>您当前在此：{{ this.$route.params.Title }}</h3>
+                <h5><a href="#" @click="toTitle">点击返回分类列表</a></h5>
+            </div>
+        </el-card>
+        <el-row>
+            <el-col :span="6" v-for="(content, index) in contents" :key="content" :offset="index > 0 ? 3 : 0">
+                <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px" >
+                    <img src="../assets/content.png" class="image">
+                    <div style="padding: 14px;">
+                        <span>{{content.Head}}</span>
+                        <div class="bottom clearfix">
+                            <time class="time">{{content.Created}}</time>
+                            <el-button type="text" class="button">操作按钮</el-button>
+                        </div>
+                    </div>
+                </el-card>
+            </el-col>
+        </el-row>
     </div>
 </template>
 
 <script>
     import h from '../api/ajax.js'
     import {GetCookie, MsgNotify} from "../api/tool.js"
+    import router from "../router/index.js"
     export default {
         name: 'contents',
         data(){
@@ -15,9 +35,11 @@
                 contents: []
             }
         },
-        props: ['TitleId'],
+        props: ['TitleId', 'Title'],
         methods: {
-
+            toTitle : function () {
+                router.push({name: 'title', params: {}})
+            }
         },
         mounted() {
             let _this = this;
@@ -31,3 +53,35 @@
         }
     }
 </script>
+
+<style>
+    .time {
+        font-size: 13px;
+        color: #999;
+    }
+
+    .bottom {
+        margin-top: 13px;
+        line-height: 12px;
+    }
+
+    .button {
+        padding: 0;
+        float: right;
+    }
+
+    .image {
+        width: 100%;
+        display: block;
+    }
+
+    .clearfix:before,
+    .clearfix:after {
+        display: table;
+        content: "";
+    }
+
+    .clearfix:after {
+        clear: both
+    }
+</style>
