@@ -3,7 +3,7 @@
         <el-card style="margin-top: 20px; margin-bottom: 10px">
             <div>
                 <h3>您当前在此：{{ this.$route.params.Title }}</h3>
-                <h5><a href="#" @click="toTitle">点击返回分类列表</a></h5>
+                <el-button @click="toTitle" type="text">点击返回分类列表</el-button>
             </div>
         </el-card>
         <el-row>
