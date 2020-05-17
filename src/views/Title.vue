@@ -2,7 +2,7 @@
     <div style="margin-top: 20px">
         <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px" v-for="(title, i) in titles">
             <div style="padding: 14px;">
-                <el-button @click="toContent(title.Id, title.Title)" type="text" >{{title.Title}}</el-button>
+                <el-button @click="toContents(title.Id, title.Title)" type="text" >{{title.Title}}</el-button>
                 <div class="bottom clearfix">
                     <time class="time">创建时间：{{title.Created}}</time>
                     <span class="button">创建人：{{title.Username}}</span>
@@ -25,7 +25,7 @@
             }
         },
         methods: {
-            toContent: function (titleId, title) {
+            toContents: function (titleId, title) {
                 router.push({name: 'contents', params: {TitleId: titleId, Title: title}})
             }
         },

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
   {
@@ -28,7 +28,13 @@ const routes = [
   {
     path: '/contents',
     name: 'contents',
-    component: () => import('../views/ContentList.vue')
+    component: () => import('../views/ContentList.vue'),
+
+  },
+  {
+    path: '/content',
+    name: 'content',
+    component: () => import('../views/Content.vue')
   }
 ];
 

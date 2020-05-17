@@ -7,11 +7,11 @@
             </div>
         </el-card>
         <el-row>
-            <el-col :span="6" v-for="(content, index) in contents" :key="content" :offset="index > 0 ? 3 : 0">
-                <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px" >
+            <el-col :span="6" v-for="(content, index) in contents" :key="content" :offset="index % 3 !== 0 ? 3 : 0">
+                <el-card :body-style="{ padding: '0px'}" style="margin-bottom: 10px" >
                     <img src="../assets/content.png" class="image">
                     <div style="padding: 14px;">
-                        <span>{{content.Head}}</span>
+                        <el-button @click="toContent(content.Id, content.Head)" type="text">{{content.Head}}</el-button>
                         <div class="bottom clearfix">
                             <time class="time">{{content.Created}}</time>
                             <el-button type="text" class="button">操作按钮</el-button>
@@ -32,25 +32,27 @@
         data(){
             return{
                 info: {UserId: '', TitleId: ''},
-                contents: []
+                contents: [],
             }
         },
         props: ['TitleId', 'Title'],
         methods: {
             toTitle : function () {
                 router.push({name: 'title', params: {}})
+            }, toContent: function (id, head) {
+                router.push({name: 'content', params: {contentId: id, head: head}})
             }
         },
         mounted() {
             let _this = this;
             _this.info.UserId = GetCookie('Id');
             _this.info.TitleId = this.$route.params.TitleId;
-            h().post('/content', _this.info).then(function (response) {
+            h().post('/contents', _this.info).then(function (response) {
                 _this.contents = response.data
             }).catch(function (error) {
                 MsgNotify("获取文章列表失败，可能是服务器错误", _this)
             })
-        }
+        },
     }
 </script>
 
