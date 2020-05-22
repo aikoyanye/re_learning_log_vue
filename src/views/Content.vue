@@ -16,6 +16,26 @@
             </div>
         </el-card>
         <tinymce-editor :disabled=isEdit :init="init" v-model="content.Value"></tinymce-editor>
+        <el-input placeholder="请输入电子邮箱" v-model="comment.Email" style="margin-top: 20px">
+            <template slot="prepend">Email:</template>
+        </el-input>
+        <el-input
+                style="margin-top: 10px"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入评论"
+                v-model="comment.Comment">
+        </el-input>
+        <el-button type="primary" style="margin-top: 10px; width: 100%; margin-bottom: 10px" icon="el-icon-check" @click="commitComment"></el-button>
+        <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px" v-for="(c, i) in comments">
+            <div style="padding: 14px;">
+                <span>{{c.Comment}}</span>
+                <div class="bottom clearfix">
+                    <time class="time">{{c.Created}}</time>
+                    <span class="button">{{c.Email}}</span>
+                </div>
+            </div>
+        </el-card>
     </div>
 </template>
 
@@ -24,13 +44,19 @@
     import Editor from '@tinymce/tinymce-vue'
     import h from '../api/ajax.js'
     import router from "../router";
-    import {GetCookie, MsgNotify} from "../api/tool.js"
+    import {GetCookie, MsgNotify, CheckDictNil} from "../api/tool.js"
     export default {
         name: 'content',
         data(){
             return{
+                comments: [],
                 value: '',
                 isEdit: true,
+                comment: {
+                    Email: '',
+                    Comment: '',
+                    ContentId: ''
+                },
                 content: {
                     Value: '',
                     created: '',
@@ -93,6 +119,21 @@
                 }).catch(function (error) {
                     MsgNotify("删除文章失败，可能是服务器错误", _this)
                 });
+            },
+            commitComment: function () {
+                this.comment.ContentId = this.content.ContentId;
+                if(CheckDictNil(this.comment)){
+                    MsgNotify("邮箱地址或评论内容不能为空")
+                }
+                let _this = this;
+                h().post('/comment/add', this.comment).then(function (response) {
+                    MsgNotify("评论成功", _this);
+                    _this.comments.unshift(response.data);
+                    _this.comment.Comment = '';
+                    _this.comment.Email = '';
+                }).catch(function (error) {
+                    MsgNotify("评论失败，请稍后再试", _this)
+                });
             }
         },
         mounted() {
@@ -101,11 +142,12 @@
             this.cId.ContentId = this.$route.params.contentId;
             this.content.ContentId = this.$route.params.contentId;
             h().post('/content', this.cId).then(function (response) {
-                _this.content.username = response.data.Username;
-                _this.content.created = response.data.Created;
-                _this.content.Value = response.data.Content;
-                _this.content.title = response.data.TitleName;
-                _this.content.titleId = response.data.TitleId;
+                _this.content.username = response.data['content'].Username;
+                _this.content.created = response.data['content'].Created;
+                _this.content.Value = response.data['content'].Content;
+                _this.content.title = response.data['content'].TitleName;
+                _this.content.titleId = response.data['content'].TitleId;
+                _this.comments = response.data['comments'];
             }).catch(function (error) {
                 MsgNotify("获取文章失败，可能是服务器错误", _this)
             });
