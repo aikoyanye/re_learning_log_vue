@@ -2,13 +2,16 @@
     <div style="margin-top: 20px">
         <el-row :gutter="20" style="margin-bottom: 10px">
             <el-col :span="6"><el-button type="primary" style="width: 100%" @click="backToContents()">返回列表</el-button></el-col>
-            <el-col :span="6"><el-button type="success" style="width: 100%" @click="isEdit=false" :disabled="!isEdit">编辑</el-button></el-col>
+            <el-col :span="6"><el-button type="success" style="width: 100%" @click="gotoEdit" :disabled="canEdit">编辑</el-button></el-col>
             <el-col :span="6"><el-button type="info" style="width: 100%" @click="editContent" :disabled="isEdit">修改</el-button></el-col>
             <el-col :span="6"><el-button type="warning" style="width: 100%" @click="delContent">删除文章</el-button></el-col>
         </el-row>
         <el-card :body-style="{ padding: '0px' }" style="margin-bottom: 10px">
             <div style="padding: 14px;">
-                <span>{{content.head}}</span>
+                <div id="head_div">
+                    <span v-show="!showHeadEdit">{{content.Head}}</span>
+                    <el-input v-model="content.Head" style="width: 100%" v-show="showHeadEdit"></el-input>
+                </div>
                 <div class="bottom clearfix">
                     <time class="time">Category：{{content.title}} <br><br>Edit：{{content.created}}</time>
                     <span class="button">Author：{{content.username}}</span>
@@ -49,9 +52,11 @@
         name: 'content',
         data(){
             return{
+                showHeadEdit: false,
                 comments: [],
                 value: '',
                 isEdit: true,
+                canEdit: true,
                 comment: {
                     Email: '',
                     Comment: '',
@@ -60,17 +65,18 @@
                 content: {
                     Value: '',
                     created: '',
-                    head: '',
+                    Head: '',
                     username: '',
                     titleId: '',
                     title: '',
-                    ContentId: ''
+                    ContentId: '',
+                    UserId: '',
                 },
                 cId: {
                     ContentId: ''
                 },
                 init: {
-                    language_url: "js/zh_CN.js",
+                    language_url: "/js/zh_CN.js",
                     language: "zh_CN",
                     height: 830,
                     plugins:
@@ -105,7 +111,8 @@
                 let _this = this;
                 h().post('/content/edit', this.content).then(function (response) {
                     MsgNotify("文章修改成功", _this);
-                    _this.isEdit=true;
+                    _this.isEdit = true;
+                    _this.isHeadEdit = false;
                     _this.content.created = response.data.Created;
                 }).catch(function (error) {
                     MsgNotify("更新文章失败，可能是服务器错误", _this)
@@ -134,11 +141,14 @@
                 }).catch(function (error) {
                     MsgNotify("评论失败，请稍后再试", _this)
                 });
+            },
+            gotoEdit: function () {
+                this.isEdit = false;
+                this.showHeadEdit = !this.showHeadEdit;
             }
         },
         mounted() {
             let _this = this;
-            this.content.head = this.$route.params.head;
             this.cId.ContentId = this.$route.params.contentId;
             this.content.ContentId = this.$route.params.contentId;
             h().post('/content', this.cId).then(function (response) {
@@ -147,7 +157,12 @@
                 _this.content.Value = response.data['content'].Content;
                 _this.content.title = response.data['content'].TitleName;
                 _this.content.titleId = response.data['content'].TitleId;
+                _this.content.UserId = response.data['content'].UserId;
                 _this.comments = response.data['comments'];
+                _this.content.Head = response.data['content'].Head;
+                if(GetCookie('Id') === _this.content.UserId){
+                    _this.canEdit = false;
+                }
             }).catch(function (error) {
                 MsgNotify("获取文章失败，可能是服务器错误", _this)
             });

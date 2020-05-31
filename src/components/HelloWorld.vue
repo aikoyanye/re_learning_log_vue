@@ -4,10 +4,9 @@
       <el-menu-item><a href="/"><img alt="Logo" src="../assets/icon.png"></a></el-menu-item>
       <el-menu-item index="1" @click="toHome">首页</el-menu-item>
       <el-menu-item index="2" @click="toTitle">分类</el-menu-item>
-      <el-menu-item index="3" v-if="isLogin">3333</el-menu-item>
-      <el-menu-item index="4" v-if="isLogin">4444</el-menu-item>
+      <el-menu-item index="3" @click="showAddTitleDialog = true" v-if="isLogin">添加分类</el-menu-item>
+      <el-menu-item index="4" @click="toAddContent" v-if="isLogin">添加文章</el-menu-item>
       <el-menu-item index="5" v-if="isLogin">5555</el-menu-item>
-      <el-menu-item index="6" v-if="isLogin">6666</el-menu-item>
       <el-submenu index="7" style="float:right" v-if="isLogin">
         <template slot="title">{{userInfo.Username}}</template>
         <el-menu-item index="2-1" @click="logout">注销</el-menu-item>
@@ -168,6 +167,24 @@
         <el-button type="primary" @click="addBanIp"><i class="el-icon-check"></i></el-button>
   </span>
     </el-dialog>
+    <el-dialog
+            title="添加分类"
+            :visible.sync="showAddTitleDialog"
+            width="30%">
+      <el-input
+              type="text"
+              v-model="title.Title">
+        <template slot="prepend">Title</template>
+      </el-input>
+      <el-radio-group v-model="title.Hidden" style="margin-top: 10px">
+        <el-radio-button label="0">公开</el-radio-button>
+        <el-radio-button label="1">隐藏</el-radio-button>
+      </el-radio-group>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showAddTitleDialog = false">取消</el-button>
+        <el-button type="primary" @click="addTitle"><i class="el-icon-check"></i></el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -188,7 +205,10 @@
         showChangeBgImgDialog: false,
         showChangeUserInfoDialog: false,
         showBanIpDialog: false,
+        showAddTitleDialog: false,
         banIp: {BanIp: ''},
+        title: {Title: '', Hidden: '0', UserId: ''},
+        titles: [],
         userInfo: {
           Username: '',
           Id: 0,
@@ -237,9 +257,10 @@
                   _this.isLogin = true;
                   _this.userInfo = response.data;
                   _this.showLoginDialog = false;
-                  this.changeUserInfo.Username = this.userInfo.Username;
-                  this.changeUserInfo.Id = this.userInfo.Id;
-                  MsgNotify("欢迎回来，" + _this.userInfo.Username, _this)
+                  _this.changeUserInfo.Username = _this.userInfo.Username;
+                  _this.changeUserInfo.Id = _this.userInfo.Id;
+                  MsgNotify("欢迎回来，" + _this.userInfo.Username, _this);
+                  router.push({name: 'VueHome', params: {}});
                 }).catch(function (error) {
         })
       }, signup: function () {
@@ -259,8 +280,11 @@
           alert("两次密码输入不正确");
         }
       }, logout: function () {
+        let _this = this;
         h().post('/user/logout', )
                 .then(function (response) {
+                  MsgNotify("您已注销", _this);
+                  router.push({name: 'VueHome', params: {}});
                   location.reload();
                 }).catch(function (error) {
         })
@@ -328,6 +352,22 @@
                 }).catch(function (error) {
                   MsgNotify("添加失败", _this);
         })
+      }, addTitle: function () {
+        this.title.UserId = GetCookie("Id");
+        if(CheckDictNil(this.title)) {
+          MsgNotify("信息不能为空", this);
+          return
+        }
+        let _this = this;
+        h().post("/title/add", this.title)
+                .then(function (response) {
+                  _this.showAddTitleDialog = false;
+                  MsgNotify("添加分类成功，请重新进入分类页面", _this);
+                }).catch(function (error) {
+                  MsgNotify("添加分类失败", _this);
+        })
+      }, toAddContent: function () {
+        router.push({name: 'addContent', params: {}});
       }
     },mounted(){
       let username = GetCookie("Username");

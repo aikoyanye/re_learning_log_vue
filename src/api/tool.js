@@ -27,4 +27,4 @@ export var CheckDictNil = function (dict) {
         }
     }
     return false
-}
+};

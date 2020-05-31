@@ -11,10 +11,9 @@
                 <el-card :body-style="{ padding: '0px'}" style="margin-bottom: 10px" >
                     <img src="../assets/content.png" class="image">
                     <div style="padding: 14px;">
-                        <el-button @click="toContent(content.Id, content.Head)" type="text">{{content.Head}}</el-button>
+                        <el-button @click="toContent(content.Id)" type="text">{{content.Head}}</el-button>
                         <div class="bottom clearfix">
                             <time class="time">{{content.Created}}</time>
-                            <el-button type="text" class="button">操作按钮</el-button>
                         </div>
                     </div>
                 </el-card>
@@ -39,8 +38,8 @@
         methods: {
             toTitle : function () {
                 router.push({name: 'title', params: {}})
-            }, toContent: function (id, head) {
-                router.push({name: 'content', params: {contentId: id, head: head}})
+            }, toContent: function (id) {
+                router.push({name: 'content', params: {contentId: id}})
             }
         },
         mounted() {
