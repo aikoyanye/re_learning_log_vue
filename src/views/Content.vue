@@ -1,7 +1,7 @@
 <template>
     <div style="margin-top: 20px">
         <el-row :gutter="20" style="margin-bottom: 10px">
-            <el-col :span="6"><el-button type="primary" style="width: 100%" @click="backToContents()">返回列表</el-button></el-col>
+            <el-col :span="6"><el-button type="primary" style="width: 100%" @click="backToContents">返回列表</el-button></el-col>
             <el-col :span="6"><el-button type="success" style="width: 100%" @click="gotoEdit" :disabled="canEdit">编辑</el-button></el-col>
             <el-col :span="6"><el-button type="info" style="width: 100%" @click="editContent" :disabled="isEdit">修改</el-button></el-col>
             <el-col :span="6"><el-button type="warning" style="width: 100%" @click="delContent">删除文章</el-button></el-col>
@@ -44,6 +44,7 @@
 
 <script>
     import tinymce from 'tinymce/tinymce'
+    import axios from 'axios'
     import Editor from '@tinymce/tinymce-vue'
     import h from '../api/ajax.js'
     import router from "../router";
@@ -85,15 +86,19 @@
                         "bold italic underline strikethrough | fontsizeselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent blockquote | undo redo | link unlink image code | removeformat",
                     branding: false,
                     images_upload_handler: function (blobInfo, success, failure) {
-                        var file = blobInfo.blob();
-                        var reader = new FileReader();
-                        reader.readAsDataURL(file);
-                        reader.onloadend = function () {
-                            if (file.size > 1048576) {
-                                failure('图片请不要大于 1MB');
-                            } else {
-                                success(reader.result);
-                            }
+                        let file = blobInfo.blob();
+                        if (file.size > 1048576) {
+                            failure('图片请不要大于 亿MB');
+                        } else {
+                            let data = new FormData();
+                            data.append("File", file, "FileName");
+                            data.append("Username", GetCookie("Username"));
+                            axios.post('http://127.0.0.1:8001/content/uploadPic', data).then(function (response) {
+                                alert("图片上传成功");
+                                success(response.data['pic']);
+                            }).catch(function (error) {
+                                failure('图片上传失败');
+                            });
                         }
                     }
                 }
@@ -112,7 +117,8 @@
                 h().post('/content/edit', this.content).then(function (response) {
                     MsgNotify("文章修改成功", _this);
                     _this.isEdit = true;
-                    _this.isHeadEdit = false;
+                    _this.canEdit = false;
+                    _this.showHeadEdit = false;
                     _this.content.created = response.data.Created;
                 }).catch(function (error) {
                     MsgNotify("更新文章失败，可能是服务器错误", _this)
@@ -144,8 +150,9 @@
             },
             gotoEdit: function () {
                 this.isEdit = false;
-                this.showHeadEdit = !this.showHeadEdit;
-            }
+                this.canEdit = true;
+                this.showHeadEdit = true;
+            },
         },
         mounted() {
             let _this = this;

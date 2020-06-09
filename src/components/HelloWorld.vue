@@ -102,7 +102,7 @@
             title="更换首页图片"
             :visible.sync="showChangeBgImgDialog"
             width="30%">
-      <el-form v-model="form">
+      <el-form>
         <el-upload class="upload-box"
                    action="http://127.0.0.1:8001/home/bg"
                    name="BgImg"
