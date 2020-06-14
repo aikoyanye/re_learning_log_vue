@@ -6,7 +6,7 @@
       <el-menu-item index="2" @click="toTitle">分类</el-menu-item>
       <el-menu-item index="3" @click="showAddTitleDialog = true" v-if="isLogin">添加分类</el-menu-item>
       <el-menu-item index="4" @click="toAddContent" v-if="isLogin">添加文章</el-menu-item>
-      <el-menu-item index="5" v-if="isLogin">5555</el-menu-item>
+      <el-menu-item index="5" @click="toPan" v-if="isLogin">假盘</el-menu-item>
       <el-submenu index="7" style="float:right" v-if="isLogin">
         <template slot="title">{{userInfo.Username}}</template>
         <el-menu-item index="2-1" @click="logout">注销</el-menu-item>
@@ -368,6 +368,8 @@
         })
       }, toAddContent: function () {
         router.push({name: 'addContent', params: {}});
+      }, toPan: function () {
+        router.push({name: 'pan', params: {}});
       }
     },mounted(){
       let username = GetCookie("Username");

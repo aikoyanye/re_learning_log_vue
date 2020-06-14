@@ -40,6 +40,11 @@ const routes = [
     path: '/content/add',
     name: 'addContent',
     component: () => import('../views/AddContent.vue')
+  },
+  {
+    path: '/pan',
+    name: 'pan',
+    component: () => import('../views/Pan.vue')
   }
 ];
 

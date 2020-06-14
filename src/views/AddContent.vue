@@ -60,8 +60,8 @@
                     branding: false,
                     images_upload_handler: function (blobInfo, success, failure) {
                         let file = blobInfo.blob();
-                        if (file.size > 1048576) {
-                            failure('图片请不要大于 亿MB');
+                        if (file.size > 2097152) {
+                            failure('图片请不要大于 2MB');
                         } else {
                             let data = new FormData();
                             data.append("File", file, "FileName");
