@@ -2,8 +2,8 @@
     <div style="margin-top: 20px">
         <el-row :gutter="20" style="margin-bottom: 10px">
             <el-col :span="6"><el-button type="primary" style="width: 100%" @click="backDir">返回上一级</el-button></el-col>
-            <el-col :span="6"><el-button type="success" style="width: 100%" @click="">222</el-button></el-col>
-            <el-col :span="6"><el-button type="info" style="width: 100%" @click="">333</el-button></el-col>
+            <el-col :span="6"><el-button type="success" style="width: 100%" @click="showCreateDirDialog=true">新建文件夹</el-button></el-col>
+            <el-col :span="6"><el-button type="info" style="width: 100%" @click="showUploadPanDialog=true">上传文件</el-button></el-col>
             <el-col :span="6"><el-button type="warning" style="width: 100%" @click="">444</el-button></el-col>
         </el-row>
         <el-table
@@ -28,6 +28,45 @@
                     width="180">
             </el-table-column>
         </el-table>
+        <el-dialog
+                title="新建文件夹"
+                :visible.sync="showCreateDirDialog"
+                width="30%">
+            <el-input
+                    type="text"
+                    v-model="currentDir.CreateDir">
+                <template slot="prepend">文件夹名</template>
+            </el-input>
+            <span slot="footer" class="dialog-footer">
+        <el-button @click="showCreateDirDialog = false">取消</el-button>
+        <el-button type="primary" @click="createDir"><i class="el-icon-check"></i></el-button>
+  </span>
+        </el-dialog>
+        <el-dialog
+                title="上传文件"
+                :visible.sync="showUploadPanDialog"
+                width="30%">
+            <el-form>
+                <el-upload class="upload-box"
+                           action="http://127.0.0.1:8001/pan/upload"
+                           name="File"
+                           accept="*/*"
+                           :limit='1'
+                           :auto-upload="true"
+                           :data="currentDir"
+                           :on-success="onUploadSuccess"
+                           :before-upload="onBeforeUpload">
+                    <el-button slot="trigger"
+                               size="small"
+                               type="primary">上传文件</el-button>
+                    <div slot="tip"
+                         class="el-upload__tip">文件大小限制为2M</div>
+                </el-upload>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+    <el-button @click="showUploadPanDialog = false">取消</el-button>
+  </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -42,8 +81,10 @@
                 userId: {Id: ''},
                 files: [],
                 baseUrl: '',
-                currentDir: {CurrentDir: ''},
+                currentDir: {CurrentDir: '', CreateDir: ''},
                 rootDir: '',
+                showCreateDirDialog: false,
+                showUploadPanDialog: false,
             }
         },
         methods: {
@@ -74,6 +115,34 @@
                 }).catch(function (error) {
                     MsgNotify("假盘初始化失败，请稍后再试", _this)
                 });
+            },
+            createDir: function () {
+                if(this.currentDir.CreateDir === ''){
+                    MsgNotify('文件夹名不能为空', this);
+                    return
+                }
+                let _this = this;
+                h().post('/pan/createDir', this.currentDir).then(function (response) {
+                    _this.files = response.data['files'];
+                    _this.showCreateDirDialog = false;
+                }).catch(function (error) {
+                    MsgNotify("创建文件夹失败", _this)
+                });
+            },
+            onUploadSuccess: function () {
+                MsgNotify("文件上传成功", this);
+                let _this = this;
+                h().post('/pan', this.currentDir).then(function (response) {
+                    _this.files = response.data['files'];
+                }).catch(function (error) {
+                    MsgNotify("假盘初始化失败，请稍后再试", _this)
+                });
+            },
+            onBeforeUpload: function (file) {
+                if(file.size/1024/1024 > 2){
+                    MsgNotify("文件大小超过2M", this);
+                    return
+                }
             }
         },
         mounted() {
