@@ -4,11 +4,12 @@
             <el-col :span="6"><el-button type="primary" style="width: 100%" @click="backDir">返回上一级</el-button></el-col>
             <el-col :span="6"><el-button type="success" style="width: 100%" @click="showCreateDirDialog=true">新建文件夹</el-button></el-col>
             <el-col :span="6"><el-button type="info" style="width: 100%" @click="showUploadPanDialog=true">上传文件</el-button></el-col>
-            <el-col :span="6"><el-button type="warning" style="width: 100%" @click="">444</el-button></el-col>
+            <el-col :span="6"><el-button type="warning" style="width: 100%" @click="deleteFileOrDir">删除所选文件</el-button></el-col>
         </el-row>
         <el-table
                 :data="files"
                 stripe
+                @selection-change="handleSelectionChange"
                 style="width: 100%">
             <el-table-column
                     type="selection"
@@ -48,7 +49,7 @@
                 width="30%">
             <el-form>
                 <el-upload class="upload-box"
-                           action="http://127.0.0.1:8001/pan/upload"
+                           action="https://aikoyanye.top/api/pan/upload"
                            name="File"
                            accept="*/*"
                            :limit='1'
@@ -81,7 +82,8 @@
                 userId: {Id: ''},
                 files: [],
                 baseUrl: '',
-                currentDir: {CurrentDir: '', CreateDir: ''},
+                currentDir: {CurrentDir: '', CreateDir: '', Selection: []},
+                Selection: [],
                 rootDir: '',
                 showCreateDirDialog: false,
                 showUploadPanDialog: false,
@@ -143,11 +145,27 @@
                     MsgNotify("文件大小超过2M", this);
                     return
                 }
+            },
+            deleteFileOrDir: function () {
+                this.currentDir.Selection = [];
+                for (let i=0; i<this.Selection.length; i++){
+                    this.currentDir.Selection.push(this.Selection[i].FileName)
+                }
+                let _this = this;
+                h().post('/pan/delete', this.currentDir).then(function (response) {
+                    MsgNotify("删除文件或文件夹成功", _this);
+                    _this.files = response.data['files'];
+                }).catch(function (error) {
+                    MsgNotify("删除文件或文件夹失败", _this)
+                });
+            },
+            handleSelectionChange: function(val) {
+                this.Selection = val;
             }
         },
         mounted() {
             let _this = this;
-            this.baseUrl = 'http://127.0.0.1:8001/pan/';
+            this.baseUrl = 'https://aikoyanye.top/pan/';
             this.currentDir.CurrentDir = GetCookie("Id") + '/';
             this.rootDir = this.currentDir.CurrentDir;
             h().post('/pan', this.currentDir).then(function (response) {

@@ -18,7 +18,8 @@
                 </div>
             </div>
         </el-card>
-        <tinymce-editor :disabled=isEdit :init="init" v-model="content.Value"></tinymce-editor>
+<!--        <tinymce-editor :disabled=isEdit :init="init" v-model="content.Value"></tinymce-editor>-->
+        <el-input type="textarea" :disabled=isEdit :rows="20" placeholder="输入点什么呗" v-model="content.Value"></el-input>
         <el-input placeholder="请输入电子邮箱" v-model="comment.Email" style="margin-top: 20px">
             <template slot="prepend">Email:</template>
         </el-input>
@@ -43,9 +44,9 @@
 </template>
 
 <script>
-    import tinymce from 'tinymce/tinymce'
+    // import tinymce from 'tinymce/tinymce'
     import axios from 'axios'
-    import Editor from '@tinymce/tinymce-vue'
+    // import Editor from '@tinymce/tinymce-vue'
     import h from '../api/ajax.js'
     import router from "../router";
     import {GetCookie, MsgNotify, CheckDictNil} from "../api/tool.js"
@@ -76,37 +77,37 @@
                 cId: {
                     ContentId: ''
                 },
-                init: {
-                    language_url: "/js/zh_CN.js",
-                    language: "zh_CN",
-                    height: 830,
-                    plugins:
-                        "link lists image code table colorpicker textcolor wordcount contextmenu",
-                    toolbar:
-                        "bold italic underline strikethrough | fontsizeselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent blockquote | undo redo | link unlink image code | removeformat",
-                    branding: false,
-                    images_upload_handler: function (blobInfo, success, failure) {
-                        let file = blobInfo.blob();
-                        if (file.size > 2097152) {
-                            failure('图片请不要大于 2MB');
-                        } else {
-                            let data = new FormData();
-                            data.append("File", file, "FileName");
-                            data.append("Username", GetCookie("Username"));
-                            axios.post('http://127.0.0.1:8001/content/uploadPic', data).then(function (response) {
-                                alert("图片上传成功");
-                                success(response.data['pic']);
-                            }).catch(function (error) {
-                                failure('图片上传失败');
-                            });
-                        }
-                    }
-                }
+                // init: {
+                //     language_url: "/js/zh_CN.js",
+                //     language: "zh_CN",
+                //     height: 830,
+                //     plugins:
+                //         "link lists image code table colorpicker textcolor wordcount contextmenu",
+                //     toolbar:
+                //         "bold italic underline strikethrough | fontsizeselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent blockquote | undo redo | link unlink image code | removeformat",
+                //     branding: false,
+                //     images_upload_handler: function (blobInfo, success, failure) {
+                //         let file = blobInfo.blob();
+                //         if (file.size > 2097152) {
+                //             failure('图片请不要大于 2MB');
+                //         } else {
+                //             let data = new FormData();
+                //             data.append("File", file, "FileName");
+                //             data.append("Username", GetCookie("Username"));
+                //             axios.post('https://aikoyanye.top/api/content/uploadPic', data).then(function (response) {
+                //                 alert("图片上传成功");
+                //                 success(response.data['pic']);
+                //             }).catch(function (error) {
+                //                 failure('图片上传失败');
+                //             });
+                //         }
+                //     }
+                // }
             }
         },
-        components: {
-            "tinymce-editor": Editor
-        },
+        // components: {
+        //     "tinymce-editor": Editor
+        // },
         props: ['contentId', 'head'],
         methods: {
             backToContents: function () {

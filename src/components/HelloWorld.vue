@@ -233,12 +233,10 @@
           Username: '',
           OPassword: '',
           NPassword: '',
-          ANPassword: ''
+          ANPassword: '',
+          CSRF: ''
         }
       };
-    },
-    components:{
-
     },
     name: 'HelloWorld',
     props: {
@@ -262,6 +260,7 @@
                   MsgNotify("欢迎回来，" + _this.userInfo.Username, _this);
                   router.push({name: 'VueHome', params: {}});
                 }).catch(function (error) {
+                  MsgNotify("登录失败，不知道为啥，可能是密码错误:" + error, _this);
         })
       }, signup: function () {
         if(CheckDictNil(this.signupForm)){
@@ -322,6 +321,7 @@
         this.showChangeBgImgDialog = false;
         MsgNotify('更新首页图片成功，刷新生效', this)
       }, changeUserInfoFunc: function () {
+        this.changeUserInfo.CSRF = GetCookie('_CSRF');
         if(CheckDictNil(this.changeUserInfo)){
           MsgNotify("输入框内容不允许为空", this);
           return

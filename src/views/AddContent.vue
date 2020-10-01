@@ -22,22 +22,23 @@
         style="margin-top: 10px;width: 100%;margin-bottom: 10px">
             <template slot="prepend">文章标题</template>
         </el-input>
-        <tinymce-editor :disabled=isEdit :init="init" v-model="content.Content"></tinymce-editor>
+        <el-input type="textarea" :rows="20" placeholder="输入点什么呗" v-model="content.Content"></el-input>
+<!--        <tinymce-editor :disabled=isEdit :init="init" v-model="content.Content"></tinymce-editor>-->
     </div>
 </template>
 
 <script>
-    import tinymce from 'tinymce/tinymce'
+    // import tinymce from 'tinymce/tinymce'
     import axios from 'axios'
-    import Editor from '@tinymce/tinymce-vue'
+    // import Editor from '@tinymce/tinymce-vue'
     import h from '../api/ajax.js'
     import router from "../router";
     import {GetCookie, MsgNotify, CheckDictNil} from "../api/tool.js"
     export default {
         name: 'AddContent',
-        components: {
-            "tinymce-editor": Editor
-        },
+        // components: {
+        //     "tinymce-editor": Editor
+        // },
         data(){
             return{
                 titles: [],
@@ -49,32 +50,32 @@
                     TitleId: '',
                     Hidden: '0'
                 },
-                init: {
-                    language_url: "/js/zh_CN.js",
-                    language: "zh_CN",
-                    height: 830,
-                    plugins:
-                        "link lists image code table colorpicker textcolor wordcount contextmenu",
-                    toolbar:
-                        "bold italic underline strikethrough | fontsizeselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent blockquote | undo redo | link unlink image code | removeformat",
-                    branding: false,
-                    images_upload_handler: function (blobInfo, success, failure) {
-                        let file = blobInfo.blob();
-                        if (file.size > 2097152) {
-                            failure('图片请不要大于 2MB');
-                        } else {
-                            let data = new FormData();
-                            data.append("File", file, "FileName");
-                            data.append("Username", GetCookie("Username"));
-                            axios.post('http://127.0.0.1:8001/content/uploadPic', data).then(function (response) {
-                                alert("图片上传成功");
-                                success(response.data['pic']);
-                            }).catch(function (error) {
-                                failure('图片上传失败');
-                            });
-                        }
-                    }
-                }
+                // init: {
+                //     language_url: "/js/zh_CN.js",
+                //     language: "zh_CN",
+                //     height: 830,
+                //     plugins:
+                //         "link lists image code table colorpicker textcolor wordcount contextmenu",
+                //     toolbar:
+                //         "bold italic underline strikethrough | fontsizeselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent blockquote | undo redo | link unlink image code | removeformat",
+                //     branding: false,
+                //     images_upload_handler: function (blobInfo, success, failure) {
+                //         let file = blobInfo.blob();
+                //         if (file.size > 2097152) {
+                //             failure('图片请不要大于 2MB');
+                //         } else {
+                //             let data = new FormData();
+                //             data.append("File", file, "FileName");
+                //             data.append("Username", GetCookie("Username"));
+                //             axios.post('http://127.0.0.1:8001/content/uploadPic', data).then(function (response) {
+                //                 alert("图片上传成功");
+                //                 success(response.data['pic']);
+                //             }).catch(function (error) {
+                //                 failure('图片上传失败');
+                //             });
+                //         }
+                //     }
+                // }
             }
         },
         methods: {
